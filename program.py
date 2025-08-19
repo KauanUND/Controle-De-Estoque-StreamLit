@@ -361,3 +361,23 @@ else:
         file_name="estoque_completo.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+    # --- SPOTIFY PLAYER INDEPENDENTE ---
+st.subheader("🎵 Spotify Player")
+musica_busca = st.text_input("Pesquisar música no Spotify")
+
+if musica_busca:
+    try:
+        token = get_spotify_token(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET)
+        tracks = search_spotify(musica_busca, token)
+        if tracks:
+            for track in tracks:
+                st.markdown(f"**{track['name']}** - {track['artists'][0]['name']}")
+                if track.get("preview_url"):
+                    st.audio(track["preview_url"])
+                else:
+                    st.info("❌ Preview não disponível")
+        else:
+            st.info("Nenhuma música encontrada.")
+    except Exception as e:
+        st.error(f"Erro ao acessar Spotify: {e}")
