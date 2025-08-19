@@ -70,6 +70,7 @@ def mostrar_estoque(df_to_show):
         estoque_container.dataframe(styled, width=1300, use_container_width=False)
 
 def atualizar_resumo(container):
+    container.empty()  # Limpa tudo antes de redesenhar
     with container:
         col1, col2, col3 = st.columns(3)
         total_itens = st.session_state.df["Quantidade"].sum() if not st.session_state.df.empty else 0
@@ -78,6 +79,7 @@ def atualizar_resumo(container):
         col1.metric("Total de itens", total_itens)
         col2.metric("Valor total do estoque", f"R$ {valor_estoque:,.2f}")
         col3.metric("Produtos cadastrados", quantidade_produtos)
+
 
 def filtrar_df(termo: str) -> pd.DataFrame:
     if not termo:
