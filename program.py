@@ -12,17 +12,125 @@ if "login_autenticado" not in st.session_state:
 
 # --- TELA DE LOGIN ---
 if not st.session_state.login_autenticado:
-    st.subheader("🔒 Login")
-    usuario_input = st.text_input("Usuário")
-    senha_input = st.text_input("Senha", type="password")
-    login_btn = st.button("Entrar")
-
-    if login_btn:
-        if usuario_input == USUARIO_CORRETO and senha_input == SENHA_CORRETA:
-            st.session_state.login_autenticado = True
-            st.success("✅ Login realizado com sucesso!")
-        else:
-            st.error("❌ Usuário ou senha incorretos.")
+    # Estilo específico para login
+    st.markdown(
+        """
+        <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-message {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .welcome-highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: transparent;
+            border-radius: 15px;
+            margin-top: 2rem;
+            animation: fadeIn 1.2s ease-out;
+        }
+        
+        .login-title {
+            color: white;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stTextInput > div > div > input {
+            background-color: white !important;
+            border: 2px solid #e0e0e0 !important;
+            border-radius: 8px !important;
+            padding: 12px 16px !important;
+            font-size: 1rem !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+            color: #2c3e50 !important;
+        }
+        
+        .stTextInput > div > div > input::placeholder {
+            color: #7f8c8d !important;
+        }
+        
+        .stTextInput > div > div > input:focus {
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.2) !important;
+            outline: none !important;
+            border-color: #667eea !important;
+        }
+        
+        .stTextInput label {
+            color: #2c3e50 !important;
+            font-weight: 500 !important;
+            font-size: 0.9rem !important;
+        }
+        
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(238,90,36,0.4);
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # Mensagem de boas-vindas com animação suave
+    st.markdown(
+        """
+        <div class="welcome-message">
+            Bem-vindo ao <span class="welcome-highlight">Controle de Estoque RGLED</span><br>
+            <small style="font-size: 1rem; color: #7f8c8d;">Faça o login para continuar</small>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
+    
+    # Container centralizado para login
+    st.markdown('<div class="login-container">', unsafe_allow_html=True)
+    
+    with st.form("login_form", clear_on_submit=False):
+        usuario_input = st.text_input("Usuário", placeholder="Digite seu usuário")
+        senha_input = st.text_input("Senha", type="password", placeholder="Digite sua senha")
+        login_btn = st.form_submit_button("Entrar", use_container_width=True)
+        
+        if login_btn:
+            if usuario_input == USUARIO_CORRETO and senha_input == SENHA_CORRETA:
+                st.session_state.login_autenticado = True
+                st.success("✅ Login realizado com sucesso!")
+                st.rerun()
+            else:
+                st.error("❌ Credenciais inválidas. Tente novamente.")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 else:
     # --- PLANO DE FUNDO E ESTILO ---
     st.markdown(
