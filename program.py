@@ -22,6 +22,7 @@ st.markdown(
 
 # --- ARQUIVO DE ESTOQUE ---
 ARQUIVO_ESTOQUE = "data/estoque_limpo.xlsx"
+os.makedirs(os.path.dirname(ARQUIVO_ESTOQUE), exist_ok=True)
 
 # --- FUNÇÕES ---
 def carregar_estoque():
