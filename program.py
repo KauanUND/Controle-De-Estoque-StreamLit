@@ -27,14 +27,17 @@ ARQUIVO_ESTOQUE = "estoque_limpo.xlsx"
 def carregar_estoque():
     if os.path.exists(ARQUIVO_ESTOQUE):
         df = pd.read_excel(ARQUIVO_ESTOQUE)
-        df["Quantidade"] = pd.to_numeric(df.get("Quantidade"), errors="coerce").fillna(0).astype(int)
-        df["Valor de Compra"] = pd.to_numeric(df.get("Valor de Compra"), errors="coerce").fillna(0.0)
-        df["Valor Total"] = pd.to_numeric(df.get("Valor Total"), errors="coerce").fillna(0.0)
-        df["SKU"] = df.get("SKU", pd.Series(dtype=str)).astype(str)
-        df["Descrição"] = df.get("Descrição", pd.Series(dtype=str)).astype(str)
-        return df
     else:
-        return pd.DataFrame(columns=["SKU", "Descrição", "Quantidade", "Valor de Compra", "Valor Total"])
+        # Cria um DataFrame vazio e salva para o deploy
+        df = pd.DataFrame(columns=["SKU", "Descrição", "Quantidade", "Valor de Compra", "Valor Total"])
+        df.to_excel(ARQUIVO_ESTOQUE, index=False)
+    # Conversões de tipos
+    df["Quantidade"] = pd.to_numeric(df.get("Quantidade"), errors="coerce").fillna(0).astype(int)
+    df["Valor de Compra"] = pd.to_numeric(df.get("Valor de Compra"), errors="coerce").fillna(0.0)
+    df["Valor Total"] = pd.to_numeric(df.get("Valor Total"), errors="coerce").fillna(0.0)
+    df["SKU"] = df.get("SKU", pd.Series(dtype=str)).astype(str)
+    df["Descrição"] = df.get("Descrição", pd.Series(dtype=str)).astype(str)
+    return df
 
 def salvar_estoque(df):
     try:
