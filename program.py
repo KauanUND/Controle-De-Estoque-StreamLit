@@ -62,24 +62,21 @@ def mostrar_estoque(df_to_show):
             .applymap(color_quantidade, subset=['Quantidade'])
             .set_table_styles([
                 {'selector': 'thead th', 'props': [('background-color', '#3e3e50'), ('color', '#b0b0b0'), ('font-weight', 'bold')]},
-                {'selector': 'tbody td', 'props': [('color', '#f0f0f0'), ('background-color', '#2e2e3e')]}
+                {'selector': 'tbody td', 'props': [('color', '#f0f0f0'), ('background-color', '#2e2e3e')] }
             ])
             .set_properties(**{'text-align': 'left'})
             .set_table_attributes('class="dataframe"')
         )
         estoque_container.dataframe(styled, width=1300, use_container_width=False)
 
-def atualizar_resumo(container):
-    container.empty()  # Limpa tudo antes de redesenhar
-    with container:
-        col1, col2, col3 = st.columns(3)
-        total_itens = st.session_state.df["Quantidade"].sum() if not st.session_state.df.empty else 0
-        valor_estoque = st.session_state.df["Valor Total"].sum() if not st.session_state.df.empty else 0.0
-        quantidade_produtos = st.session_state.df.shape[0]
-        col1.metric("Total de itens", total_itens)
-        col2.metric("Valor total do estoque", f"R$ {valor_estoque:,.2f}")
-        col3.metric("Produtos cadastrados", quantidade_produtos)
-
+def atualizar_resumo():
+    col1, col2, col3 = resumo_container.columns(3)
+    total_itens = st.session_state.df["Quantidade"].sum() if not st.session_state.df.empty else 0
+    valor_estoque = st.session_state.df["Valor Total"].sum() if not st.session_state.df.empty else 0.0
+    quantidade_produtos = st.session_state.df.shape[0]
+    col1.metric("Total de itens", total_itens)
+    col2.metric("Valor total do estoque", f"R$ {valor_estoque:,.2f}")
+    col3.metric("Produtos cadastrados", quantidade_produtos)
 
 def filtrar_df(termo: str) -> pd.DataFrame:
     if not termo:
@@ -112,7 +109,7 @@ if "produto_remover" not in st.session_state: st.session_state.produto_remover =
 # --- RESUMO COM CONTAINER ---
 st.subheader("📊 Resumo do Estoque")
 resumo_container = st.container()
-atualizar_resumo(resumo_container)
+atualizar_resumo()
 
 # --- FILTRO ---
 st.subheader("🔍 Filtrar Produtos")
@@ -149,7 +146,7 @@ with st.expander("➕ Adicionar Produto"):
                 salvar_estoque(st.session_state.df)
                 df_filtrado = filtrar_df(filtro)
                 mostrar_estoque(df_filtrado)
-                atualizar_resumo(resumo_container)
+                atualizar_resumo()
                 st.success(f"✅ Produto **{descricao}** adicionado com sucesso!")
                 st.session_state.sku_temp = ""
                 st.session_state.descricao_temp = ""
@@ -182,7 +179,7 @@ if not st.session_state.df.empty:
                     salvar_estoque(st.session_state.df)
                     df_filtrado = filtrar_df(filtro)
                     mostrar_estoque(df_filtrado)
-                    atualizar_resumo(resumo_container)
+                    atualizar_resumo()
                     st.success(f"✅ Produto **{descricao}** atualizado!")
 
 # --- REMOVER PRODUTO ---
@@ -209,7 +206,7 @@ if not st.session_state.df.empty:
                 salvar_estoque(st.session_state.df)
                 df_filtrado = filtrar_df(filtro)
                 mostrar_estoque(df_filtrado)
-                atualizar_resumo(resumo_container)
+                atualizar_resumo()
                 if st.session_state.produto_editar == produto_remover:
                     st.session_state.produto_editar = None
                 if st.session_state.produto_remover == produto_remover:
