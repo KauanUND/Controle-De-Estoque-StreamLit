@@ -29,10 +29,8 @@ def carregar_estoque():
     if os.path.exists(ARQUIVO_ESTOQUE):
         df = pd.read_excel(ARQUIVO_ESTOQUE)
     else:
-        # Cria um DataFrame vazio e salva para o deploy
         df = pd.DataFrame(columns=["SKU", "Descrição", "Quantidade", "Valor de Compra", "Valor Total"])
         df.to_excel(ARQUIVO_ESTOQUE, index=False)
-    # Conversões de tipos
     df["Quantidade"] = pd.to_numeric(df.get("Quantidade"), errors="coerce").fillna(0).astype(int)
     df["Valor de Compra"] = pd.to_numeric(df.get("Valor de Compra"), errors="coerce").fillna(0.0)
     df["Valor Total"] = pd.to_numeric(df.get("Valor Total"), errors="coerce").fillna(0.0)
@@ -71,14 +69,15 @@ def mostrar_estoque(df_to_show):
         )
         estoque_container.dataframe(styled, width=1300, use_container_width=False)
 
-def atualizar_resumo():
-    total_itens = st.session_state.df["Quantidade"].sum() if not st.session_state.df.empty else 0
-    valor_estoque = st.session_state.df["Valor Total"].sum() if not st.session_state.df.empty else 0.0
-    quantidade_produtos = st.session_state.df.shape[0]
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Total de itens", total_itens)
-    col2.metric("Valor total do estoque", f"R$ {valor_estoque:,.2f}")
-    col3.metric("Produtos cadastrados", quantidade_produtos)
+def atualizar_resumo(container):
+    with container:
+        col1, col2, col3 = st.columns(3)
+        total_itens = st.session_state.df["Quantidade"].sum() if not st.session_state.df.empty else 0
+        valor_estoque = st.session_state.df["Valor Total"].sum() if not st.session_state.df.empty else 0.0
+        quantidade_produtos = st.session_state.df.shape[0]
+        col1.metric("Total de itens", total_itens)
+        col2.metric("Valor total do estoque", f"R$ {valor_estoque:,.2f}")
+        col3.metric("Produtos cadastrados", quantidade_produtos)
 
 def filtrar_df(termo: str) -> pd.DataFrame:
     if not termo:
@@ -108,9 +107,10 @@ if "valor_compra_temp" not in st.session_state: st.session_state.valor_compra_te
 if "produto_editar" not in st.session_state: st.session_state.produto_editar = None
 if "produto_remover" not in st.session_state: st.session_state.produto_remover = None
 
-# --- RESUMO ---
+# --- RESUMO COM CONTAINER ---
 st.subheader("📊 Resumo do Estoque")
-atualizar_resumo()
+resumo_container = st.container()
+atualizar_resumo(resumo_container)
 
 # --- FILTRO ---
 st.subheader("🔍 Filtrar Produtos")
@@ -147,7 +147,7 @@ with st.expander("➕ Adicionar Produto"):
                 salvar_estoque(st.session_state.df)
                 df_filtrado = filtrar_df(filtro)
                 mostrar_estoque(df_filtrado)
-                atualizar_resumo()
+                atualizar_resumo(resumo_container)
                 st.success(f"✅ Produto **{descricao}** adicionado com sucesso!")
                 st.session_state.sku_temp = ""
                 st.session_state.descricao_temp = ""
@@ -180,7 +180,7 @@ if not st.session_state.df.empty:
                     salvar_estoque(st.session_state.df)
                     df_filtrado = filtrar_df(filtro)
                     mostrar_estoque(df_filtrado)
-                    atualizar_resumo()
+                    atualizar_resumo(resumo_container)
                     st.success(f"✅ Produto **{descricao}** atualizado!")
 
 # --- REMOVER PRODUTO ---
@@ -207,7 +207,7 @@ if not st.session_state.df.empty:
                 salvar_estoque(st.session_state.df)
                 df_filtrado = filtrar_df(filtro)
                 mostrar_estoque(df_filtrado)
-                atualizar_resumo()
+                atualizar_resumo(resumo_container)
                 if st.session_state.produto_editar == produto_remover:
                     st.session_state.produto_editar = None
                 if st.session_state.produto_remover == produto_remover:
