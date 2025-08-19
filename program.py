@@ -62,7 +62,7 @@ def mostrar_estoque(df_to_show):
             .applymap(color_quantidade, subset=['Quantidade'])
             .set_table_styles([
                 {'selector': 'thead th', 'props': [('background-color', '#3e3e50'), ('color', '#b0b0b0'), ('font-weight', 'bold')]},
-                {'selector': 'tbody td', 'props': [('color', '#f0f0f0'), ('background-color', '#2e2e3e')]}
+                {'selector': 'tbody td', 'props': [('color', '#f0f0f0'), ('background-color', '#2e2e3e')]},
             ])
             .set_properties(**{'text-align': 'left'})
             .set_table_attributes('class="dataframe"')
@@ -73,10 +73,10 @@ def atualizar_resumo():
     total_itens = st.session_state.df["Quantidade"].sum() if not st.session_state.df.empty else 0
     valor_estoque = st.session_state.df["Valor Total"].sum() if not st.session_state.df.empty else 0.0
     quantidade_produtos = st.session_state.df.shape[0]
-    # Atualiza os valores existentes das métricas
-    col1.metric("Total de itens", total_itens)
-    col2.metric("Valor total do estoque", f"R$ {valor_estoque:,.2f}")
-    col3.metric("Produtos cadastrados", quantidade_produtos)
+
+    st.session_state.total_itens_placeholder.metric("Total de itens", total_itens)
+    st.session_state.valor_estoque_placeholder.metric("Valor total do estoque", f"R$ {valor_estoque:,.2f}")
+    st.session_state.quantidade_produtos_placeholder.metric("Produtos cadastrados", quantidade_produtos)
 
 def filtrar_df(termo: str) -> pd.DataFrame:
     if not termo:
@@ -106,10 +106,13 @@ if "valor_compra_temp" not in st.session_state: st.session_state.valor_compra_te
 if "produto_editar" not in st.session_state: st.session_state.produto_editar = None
 if "produto_remover" not in st.session_state: st.session_state.produto_remover = None
 
-# --- RESUMO FIXO ---
+# --- RESUMO COM PLACEHOLDERS ---
 st.subheader("📊 Resumo do Estoque")
 resumo_container = st.container()
 col1, col2, col3 = resumo_container.columns(3)
+st.session_state.total_itens_placeholder = col1.empty()
+st.session_state.valor_estoque_placeholder = col2.empty()
+st.session_state.quantidade_produtos_placeholder = col3.empty()
 atualizar_resumo()
 
 # --- FILTRO ---
@@ -214,7 +217,7 @@ if not st.session_state.df.empty:
                     st.session_state.produto_remover = None
                 st.warning(f"⚠️ Produto com SKU **{produto_remover}** removido do estoque!")
 
-# --- BOTÃO DE DOWNLOAD DO EXCEL ---
+# --- BOTÃO DE DOWNLOAD DO EXCEL (sempre visível) ---
 excel_bytes = gerar_excel_bytes(st.session_state.df)
 st.download_button(
     label="📥 Baixar Estoque Completo",
