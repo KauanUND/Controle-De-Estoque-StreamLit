@@ -2,29 +2,6 @@ import streamlit as st
 import pandas as pd
 import os
 import io
-import requests
-
-# --- CONFIGURAÇÃO SPOTIFY ---
-SPOTIFY_CLIENT_ID = "SEU_CLIENT_ID_AQUI8117d885ee9f429aa8038ea590590f33"
-SPOTIFY_CLIENT_SECRET = "efe03ba03cb7487787dfb0063e815d4e"
-
-def get_spotify_token(client_id, client_secret):
-    auth_url = "https://accounts.spotify.com/api/token"
-    auth_response = requests.post(auth_url, {
-        "grant_type": "client_credentials",
-        "client_id": client_id,
-        "client_secret": client_secret,
-    })
-    auth_response_data = auth_response.json()
-    return auth_response_data.get("access_token")
-
-def search_spotify(query, token, limit=5):
-    search_url = "https://api.spotify.com/v1/search"
-    headers = {"Authorization": f"Bearer {token}"}
-    params = {"q": query, "type": "track", "limit": limit}
-    response = requests.get(search_url, headers=headers, params=params)
-    data = response.json()
-    return data.get("tracks", {}).get("items", [])
 
 # --- CONFIGURAÇÃO DE LOGIN ---
 USUARIO_CORRETO = "admin"
@@ -35,25 +12,98 @@ if "login_autenticado" not in st.session_state:
 
 # --- TELA DE LOGIN ---
 if not st.session_state.login_autenticado:
+    # Estilo específico para login
     st.markdown(
         """
         <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .welcome-message { text-align: center; color: #2c3e50; font-size: 1.5rem; font-weight: 300; margin-bottom: 2rem; animation: fadeIn 1s ease-out; }
-        .welcome-highlight { color: #667eea; font-weight: 600; }
-        .login-container { max-width: 400px; margin: 0 auto; padding: 2rem; background: transparent; border-radius: 15px; margin-top: 2rem; animation: fadeIn 1.2s ease-out; }
-        .login-title { color: white; text-align: center; font-size: 1.8rem; font-weight: 600; margin-bottom: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .stTextInput > div > div > input { background-color: white !important; border: 2px solid #e0e0e0 !important; border-radius: 8px !important; padding: 12px 16px !important; font-size: 1rem !important; box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important; color: #2c3e50 !important; }
-        .stTextInput > div > div > input::placeholder { color: #7f8c8d !important; }
-        .stTextInput > div > div > input:focus { box-shadow: 0 0 0 3px rgba(102,126,234,0.2) !important; outline: none !important; border-color: #667eea !important; }
-        .stTextInput label { color: #2c3e50 !important; font-weight: 500 !important; font-size: 0.9rem !important; }
-        .login-btn { width: 100%; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; border: none; border-radius: 8px; padding: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 1rem; }
-        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(238,90,36,0.4); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-message {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .welcome-highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: transparent;
+            border-radius: 15px;
+            margin-top: 2rem;
+            animation: fadeIn 1.2s ease-out;
+        }
+        
+        .login-title {
+            color: white;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stTextInput > div > div > input {
+            background-color: white !important;
+            border: 2px solid #e0e0e0 !important;
+            border-radius: 8px !important;
+            padding: 12px 16px !important;
+            font-size: 1rem !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+            color: #2c3e50 !important;
+        }
+        
+        .stTextInput > div > div > input::placeholder {
+            color: #7f8c8d !important;
+        }
+        
+        .stTextInput > div > div > input:focus {
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.2) !important;
+            outline: none !important;
+            border-color: #667eea !important;
+        }
+        
+        .stTextInput label {
+            color: #2c3e50 !important;
+            font-weight: 500 !important;
+            font-size: 0.9rem !important;
+        }
+        
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(238,90,36,0.4);
+        }
         </style>
         """,
         unsafe_allow_html=True
     )
     
+    # Mensagem de boas-vindas com animação suave
     st.markdown(
         """
         <div class="welcome-message">
@@ -64,6 +114,7 @@ if not st.session_state.login_autenticado:
         unsafe_allow_html=True
     )
     
+    # Container centralizado para login
     st.markdown('<div class="login-container">', unsafe_allow_html=True)
     
     with st.form("login_form", clear_on_submit=False):
@@ -80,7 +131,6 @@ if not st.session_state.login_autenticado:
                 st.error("❌ Credenciais inválidas. Tente novamente.")
     
     st.markdown('</div>', unsafe_allow_html=True)
-
 else:
     # --- PLANO DE FUNDO E ESTILO ---
     st.markdown(
@@ -227,7 +277,7 @@ else:
                 if sku.strip() == "":
                     st.error("❌ SKU não pode ficar vazio!")
                 elif sku in st.session_state.df["SKU"].values:
-                    st.error(f"❌ Produto com SKU **{sku}** já existe!")
+                    st.error(f"❌ Produto com SKU *{sku}* já existe!")
                 else:
                     valor_total = int(quantidade) * float(valor_compra)
                     novo_item = pd.DataFrame({"SKU":[sku],"Descrição":[descricao],"Quantidade":[quantidade],
@@ -237,7 +287,7 @@ else:
                     df_filtrado = filtrar_df(filtro)
                     mostrar_estoque(df_filtrado)
                     atualizar_resumo()
-                    st.success(f"✅ Produto **{descricao}** adicionado com sucesso!")
+                    st.success(f"✅ Produto *{descricao}* adicionado com sucesso!")
                     st.session_state.sku_temp = ""
                     st.session_state.descricao_temp = ""
                     st.session_state.quantidade_temp = 0
@@ -270,7 +320,7 @@ else:
                         df_filtrado = filtrar_df(filtro)
                         mostrar_estoque(df_filtrado)
                         atualizar_resumo()
-                        st.success(f"✅ Produto **{descricao}** atualizado!")
+                        st.success(f"✅ Produto *{descricao}* atualizado!")
 
     # --- REMOVER PRODUTO ---
     if not st.session_state.df.empty:
@@ -301,29 +351,13 @@ else:
                         st.session_state.produto_editar = None
                     if st.session_state.produto_remover == produto_remover:
                         st.session_state.produto_remover = None
-                    st.warning(f"⚠️ Produto com SKU **{produto_remover}** removido do estoque!")
+                    st.warning(f"⚠️ Produto com SKU *{produto_remover}* removido do estoque!")
 
-    # --- BOTÃO DE EXPORTAÇÃO ---
-    with st.expander("💾 Exportar Estoque"):
-        if st.button("Exportar para Excel"):
-            excel_bytes = gerar_excel_bytes(st.session_state.df)
-            st.download_button("⬇️ Baixar Excel", data=excel_bytes, file_name="estoque_rgled.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-    # --- SPOTIFY PLAYER (aparece só após login) ---
-    with st.expander("🎵 Ouvir Spotify"):
-        musica_busca = st.text_input("Pesquisar música no Spotify")
-        if musica_busca:
-            try:
-                token = get_spotify_token(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET)
-                tracks = search_spotify(musica_busca, token)
-                if tracks:
-                    for track in tracks:
-                        st.markdown(f"**{track['name']}** - {track['artists'][0]['name']}")
-                        if track.get("preview_url"):
-                            st.audio(track["preview_url"])
-                        else:
-                            st.info("Preview não disponível")
-                else:
-                    st.info("Nenhuma música encontrada.")
-            except Exception as e:
-                st.error(f"Erro ao acessar Spotify: {e}")
+    # --- BOTÃO DE DOWNLOAD DO EXCEL (sempre visível) ---
+    excel_bytes = gerar_excel_bytes(st.session_state.df)
+    st.download_button(
+        label="📥 Baixar Estoque Completo",
+        data=excel_bytes,
+        file_name="estoque_completo.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
