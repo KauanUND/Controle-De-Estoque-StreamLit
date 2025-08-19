@@ -21,7 +21,7 @@ st.markdown(
 )
 
 # --- ARQUIVO DE ESTOQUE ---
-ARQUIVO_ESTOQUE = "estoque_limpo.xlsx"
+ARQUIVO_ESTOQUE = "data/estoque_limpo.xlsx"
 
 # --- FUNÇÕES ---
 def carregar_estoque():
